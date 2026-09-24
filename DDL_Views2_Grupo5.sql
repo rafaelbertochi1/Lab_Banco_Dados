@@ -42,17 +42,11 @@ ORDER BY Faixa_Horario;
 /* ============================================================================
    2. COMPARAÇÃO ENTRE PERÍODOS (Rafael)
    Atendimentos, clientes, faturamento e média mensal de cada período.
+   Etapa 1 (WITH): etiqueta cada atendimento com o seu período.
+   Etapa 2 (SELECT): agrupa por período e faz as contas.
    ============================================================================ */
 CREATE OR REPLACE VIEW VW_COMPARACAO_PERIODOS_RAFAEL AS
-SELECT
-    Periodo,
-    COUNT(DISTINCT Mes) AS Meses,
-    COUNT(*) AS Qtd_Atendimentos,
-    COUNT(DISTINCT id_cliente) AS Clientes_Atendidos,
-    SUM(total_geral) AS Faturamento_Total,
-    ROUND(SUM(total_geral) / COUNT(DISTINCT Mes), 2) AS Faturamento_Medio_Mensal,
-    ROUND(AVG(total_geral), 2) AS Ticket_Medio
-FROM (
+WITH atendimentos_por_periodo AS (
     SELECT
         CASE
             WHEN a.data_atendimento < DATE '2025-09-01' THEN '1 - jan a ago/2025'
@@ -65,6 +59,15 @@ FROM (
     FROM atendimento a
     WHERE a.tipo = 'Pagamento'
 )
+SELECT
+    Periodo,
+    COUNT(DISTINCT Mes) AS Meses,
+    COUNT(*) AS Qtd_Atendimentos,
+    COUNT(DISTINCT id_cliente) AS Clientes_Atendidos,
+    SUM(total_geral) AS Faturamento_Total,
+    ROUND(SUM(total_geral) / COUNT(DISTINCT Mes), 2) AS Faturamento_Medio_Mensal,
+    ROUND(AVG(total_geral), 2) AS Ticket_Medio
+FROM atendimentos_por_periodo
 GROUP BY Periodo
 ORDER BY Periodo;
 
