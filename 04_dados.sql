@@ -1,6 +1,6 @@
 ﻿/* ============================================================================
    Carga de dados do schema APP - Sistema de Gestao de Salao (Cachearia)
-   Executar depois do 02_app.sql, conectado como APP.
+   Executar depois do 03_app_audit.sql, conectado como APP.
    Os triggers TG_SEQ_* ficam desabilitados durante a carga para manter os IDs
    originais da base (as chaves estrangeiras dependem deles).
    ============================================================================ */
