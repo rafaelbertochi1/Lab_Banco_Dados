@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard do Salão</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7;
+    --surface-1: #fcfcfb;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11, 11, 11, 0.10);
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+    --series-1-soft: #86b6ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #0d0d0d;
+      --surface-1: #1a1a19;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --grid: #2c2c2a;
+      --axis: #383835;
+      --border: rgba(255, 255, 255, 0.10);
+      --series-1: #3987e5;
+      --series-2: #d95926;
+      --series-1-soft: #184f95;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface-1: #1a1a19;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255, 255, 255, 0.10);
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-1-soft: #184f95;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .pagina { max-width: 1360px; margin: 0 auto; padding: 32px 16px 40px; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  h1 { font-size: 24px; margin: 0 0 4px; font-weight: 650; letter-spacing: -0.01em; }
+  .sub { color: var(--text-secondary); margin: 0; }
+  .fonte { color: var(--text-muted); font-size: 12px; text-align: right; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .kpi, .painel { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; }
+  .kpi { padding: 16px 18px; }
+  .kpi .rotulo { color: var(--text-secondary); font-size: 13px; }
+  .kpi .valor { font-size: 28px; font-weight: 650; margin-top: 2px; }
+  .kpi .nota { color: var(--text-muted); font-size: 12px; }
+  .grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 900px) { .grade { grid-template-columns: 1fr; } }
+  .painel { padding: 18px 20px 14px; }
+  .painel h2 { font-size: 16px; margin: 0; font-weight: 650; }
+  .painel .resp { color: var(--text-muted); font-size: 12px; margin: 2px 0 0; }
+  .painel .insight { color: var(--text-secondary); margin: 8px 0 4px; font-size: 13px; }
+  .legenda { display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary); margin: 6px 0 0; }
+  .legenda span { display: inline-flex; align-items: center; gap: 6px; }
+  .legenda i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .rodape { color: var(--text-muted); font-size: 12px; margin: 4px 0 0; }
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  svg text { font: 11px system-ui, -apple-system, "Segoe UI", sans-serif; fill: var(--text-muted); font-variant-numeric: tabular-nums; }
+  svg text.rot { fill: var(--text-secondary); }
+  svg text.val { fill: var(--text-primary); font-weight: 600; }
+  .marca { transition: opacity .12s; }
+  .marca:hover { opacity: .8; }
+  #dica {
+    position: fixed; pointer-events: none; opacity: 0; transition: opacity .1s;
+    background: var(--surface-1); color: var(--text-primary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.12); z-index: 10;
+  }
+  #dica b { display: block; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <header>
+    <div>
+      <h1>Dashboard do Salão (Cachearia)</h1>
+      <p class="sub">Laboratório de Banco de Dados · Grupo 5 · Entrega 4</p>
+    </div>
+    <div class="fonte">Fonte: esquema DW, views materializadas STAGE_*<br>Base atual (APP) + histórico (H_*) · jan/2025 a ago/2026</div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="grade">
+    <article class="painel" id="painel-mensal">
+      <h2>Faturamento por mês</h2>
+      <p class="resp">STAGE_FATURAMENTO_MENSAL · João Vitor Dornelas Correa</p>
+      <p class="insight" id="insight-mensal"></p>
+      <div id="graf-mensal"></div>
+      <p class="rodape" id="rodape-mensal"></p>
+    </article>
+
+    <article class="painel" id="painel-pagamento">
+      <h2>Valor recebido por forma de pagamento</h2>
+      <p class="resp">STAGE_FORMA_PAGAMENTO · Gabriela Silveira Lima</p>
+      <p class="insight" id="insight-pagamento"></p>
+      <div id="graf-pagamento"></div>
+      <p class="rodape">Pagamentos com valor negativo (pré-pago consumido e troco) ficam fora.</p>
+    </article>
+
+    <article class="painel" id="painel-frequencia">
+      <h2>Clientes e faturamento por frequência de visitas</h2>
+      <p class="resp">STAGE_FREQUENCIA_CLIENTE · Arthur Cavalcante e Silva</p>
+      <p class="insight" id="insight-frequencia"></p>
+      <div class="legenda">
+        <span><i style="background:var(--series-1)"></i>% das clientes</span>
+        <span><i style="background:var(--series-2)"></i>% do faturamento</span>
+      </div>
+      <div id="graf-frequencia"></div>
+    </article>
+
+    <article class="painel" id="painel-horario">
+      <h2>Atendimentos por hora do dia</h2>
+      <p class="resp">STAGE_HORARIO_PICO · Rafael Bertochi Figueiredo</p>
+      <p class="insight" id="insight-horario"></p>
+      <div id="graf-horario"></div>
+      <p class="rodape">Hora do fechamento da conta (data de pagamento).</p>
+    </article>
+  </section>
+</div>
+<div id="dica"></div>
+
+<script>
+const DADOS = /*__DADOS__*/null;
+
+const brl = v => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+const brl2 = v => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const num = v => v.toLocaleString("pt-BR");
+const pct = v => v.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%";
+const MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+const rotMes = m => { const [a, n] = m.split("-"); return MESES[+n - 1] + "/" + a.slice(2); };
+const NS = "http://www.w3.org/2000/svg";
+
+function el(tag, attrs, pai, texto) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (texto !== undefined) e.textContent = texto;
+  if (pai) pai.appendChild(e);
+  return e;
+}
+
+// Barra com cantos de 4px so na ponta (a base fica reta, presa no eixo)
+function caminhoBarra(x, y, w, h, horizontal) {
+  const r = Math.min(4, (horizontal ? h : w) / 2, horizontal ? w : h);
+  if (horizontal) return `M${x},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h - r}Q${x + w},${y + h} ${x + w - r},${y + h}H${x}Z`;
+  return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+}
+
+const dica = document.getElementById("dica");
+function comDica(alvo, titulo, linhas) {
+  alvo.addEventListener("mousemove", ev => {
+    dica.innerHTML = `<b>${titulo}</b>${linhas.join("<br>")}`;
+    dica.style.opacity = 1;
+    const x = Math.min(ev.clientX + 14, innerWidth - dica.offsetWidth - 8);
+    dica.style.left = x + "px";
+    dica.style.top = (ev.clientY + 14) + "px";
+  });
+  alvo.addEventListener("mouseleave", () => { dica.style.opacity = 0; });
+}
+
+function escala(max) {
+  const passo = Math.pow(10, Math.floor(Math.log10(max)));
+  const opcoes = [1, 2, 2.5, 5, 10].map(m => m * passo);
+  const p = opcoes.find(o => max / o <= 5);
+  return { topo: Math.ceil(max / p) * p, passo: p };
+}
+
+// Colunas verticais: uma serie
+function colunas(alvo, itens, opt) {
+  const W = 620, H = 260, m = { t: 22, r: 8, b: 26, l: opt.margemEsq || 48 };
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opt.aria });
+  const max = Math.max(...itens.map(i => i.v));
+  const { topo, passo } = escala(max);
+  const ih = H - m.t - m.b, iw = W - m.l - m.r;
+  const y = v => m.t + ih - (v / topo) * ih;
+  for (let t = 0; t <= topo + 1e-9; t += passo) {
+    el("line", { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), stroke: t === 0 ? "var(--axis)" : "var(--grid)", "stroke-width": 1 }, svg);
+    el("text", { x: m.l - 8, y: y(t) + 4, "text-anchor": "end" }, svg, opt.eixo(t));
+  }
+  const banda = iw / itens.length, gap = 2, w = Math.max(4, banda - Math.max(gap, banda * 0.28));
+  itens.forEach((it, i) => {
+    const x = m.l + i * banda + (banda - w) / 2, h = Math.max(0, y(0) - y(it.v));
+    const p = el("path", { d: caminhoBarra(x, y(it.v), w, h, false), fill: it.cor || "var(--series-1)", class: "marca" }, svg);
+    const hit = el("rect", { x: m.l + i * banda, y: m.t, width: banda, height: ih, fill: "transparent" }, svg);
+    comDica(hit, it.titulo, it.dica);
+    if (!opt.pularRotulo || (itens.length - 1 - i) % opt.pularRotulo === 0)
+      el("text", { x: x + w / 2, y: H - m.b + 16, "text-anchor": "middle", class: "rot" }, svg, it.rot);
+    if (it.destaque) el("text", { x: x + w / 2, y: y(it.v) - 6, "text-anchor": "middle", class: "val" }, svg, it.destaque);
+  });
+  alvo.appendChild(svg);
+}
+
+// Barras horizontais: uma ou duas series agrupadas
+function barras(alvo, grupos, series, opt) {
+  const linha = series.length === 1 ? 34 : 46;
+  const W = 620, m = { t: 6, r: 120, b: 22, l: opt.margemEsq || 110 }, H = m.t + m.b + grupos.length * linha;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opt.aria });
+  const max = Math.max(...grupos.flatMap(g => series.map(s => g[s.campo])));
+  const { topo, passo } = escala(max);
+  const iw = W - m.l - m.r, x = v => m.l + (v / topo) * iw;
+  for (let t = 0; t <= topo + 1e-9; t += passo) {
+    el("line", { x1: x(t), x2: x(t), y1: m.t, y2: H - m.b, stroke: t === 0 ? "var(--axis)" : "var(--grid)", "stroke-width": 1 }, svg);
+    el("text", { x: x(t), y: H - m.b + 15, "text-anchor": "middle" }, svg, opt.eixo(t));
+  }
+  const alt = series.length === 1 ? 20 : 16;
+  grupos.forEach((g, i) => {
+    const y0 = m.t + i * linha + (linha - alt * series.length - 2 * (series.length - 1)) / 2;
+    el("text", { x: m.l - 10, y: m.t + i * linha + linha / 2 + 4, "text-anchor": "end", class: "rot" }, svg, g.rot);
+    series.forEach((s, j) => {
+      const y = y0 + j * (alt + 2), w = Math.max(0, x(g[s.campo]) - m.l);
+      el("path", { d: caminhoBarra(m.l, y, w, alt, true), fill: s.cor, class: "marca" }, svg);
+      el("text", { x: m.l + w + 6, y: y + alt / 2 + 4, class: "val" }, svg, s.rotulo(g));
+    });
+    const hit = el("rect", { x: 0, y: m.t + i * linha, width: W, height: linha, fill: "transparent" }, svg);
+    comDica(hit, g.rot, g.dica);
+  });
+  alvo.appendChild(svg);
+}
+
+// ---- KPIs
+const mensal = DADOS.mensal.filter(r => r.MES >= "2025-01");
+const omitidos = DADOS.mensal.filter(r => r.MES < "2025-01");
+const fat = DADOS.mensal.reduce((s, r) => s + r.FATURAMENTO, 0);
+const atd = DADOS.mensal.reduce((s, r) => s + r.QTD_ATENDIMENTOS, 0);
+const cli = DADOS.frequencia.reduce((s, r) => s + r.QTD_CLIENTES, 0);
+const desc = DADOS.mensal.reduce((s, r) => s + r.TOTAL_DESCONTOS, 0);
+document.getElementById("kpis").innerHTML = [
+  ["Faturamento total", brl(fat), `${mensal.length} meses com movimento`],
+  ["Atendimentos pagos", num(atd), "base atual + histórico"],
+  ["Ticket médio", brl2(fat / atd), "faturamento ÷ atendimentos"],
+  ["Clientes atendidas", num(cli), "clientes distintas"],
+  ["Descontos concedidos", brl(desc), "soma dos descontos no período"],
+].map(([r, v, n]) => `<div class="kpi"><div class="rotulo">${r}</div><div class="valor">${v}</div><div class="nota">${n}</div></div>`).join("");
+
+// ---- Faturamento mensal
+const pico = mensal.reduce((a, b) => b.FATURAMENTO > a.FATURAMENTO ? b : a);
+const vale = mensal.reduce((a, b) => b.FATURAMENTO < a.FATURAMENTO ? b : a);
+document.getElementById("insight-mensal").textContent =
+  `Melhor mês: ${rotMes(pico.MES)} (${brl(pico.FATURAMENTO)}). Pior: ${rotMes(vale.MES)} (${brl(vale.FATURAMENTO)}).`;
+colunas(document.getElementById("graf-mensal"), mensal.map(r => ({
+  v: r.FATURAMENTO, rot: rotMes(r.MES),
+  destaque: (r === pico || r === vale) ? brl(r.FATURAMENTO) : null,
+  titulo: rotMes(r.MES),
+  dica: [`Faturamento: ${brl2(r.FATURAMENTO)}`, `Atendimentos: ${num(r.QTD_ATENDIMENTOS)}`, `Clientes: ${num(r.CLIENTES_ATENDIDOS)}`, `Ticket médio: ${brl2(r.TICKET_MEDIO)}`],
+})), { eixo: t => "R$ " + (t / 1000).toLocaleString("pt-BR") + " mil", aria: "Faturamento por mês", pularRotulo: 2, margemEsq: 62 });
+if (omitidos.length)
+  document.getElementById("rodape-mensal").textContent =
+    `${omitidos.reduce((s, r) => s + r.QTD_ATENDIMENTOS, 0)} atendimentos com data em 2024 e valor zero ficam fora do gráfico (entram nos totais).`;
+
+// ---- Formas de pagamento
+const pg = DADOS.pagamento;
+document.getElementById("insight-pagamento").textContent =
+  `${pg[0].FORMA_PAGAMENTO} responde por ${pct(pg[0].PCT_VALOR_RECEBIDO)} do valor recebido, com ticket de ${brl2(pg[0].VALOR_MEDIO)}.`;
+barras(document.getElementById("graf-pagamento"), pg.map(r => ({
+  ...r, rot: r.FORMA_PAGAMENTO,
+  dica: [`Valor: ${brl2(r.VALOR_TOTAL)} (${pct(r.PCT_VALOR_RECEBIDO)})`, `Transações: ${num(r.QTD_TRANSACOES)}`, `Valor médio: ${brl2(r.VALOR_MEDIO)}`, `Maior pagamento: ${brl2(r.MAIOR_PAGAMENTO)}`],
+})), [{ campo: "VALOR_TOTAL", cor: "var(--series-1)", rotulo: g => `${brl(g.VALOR_TOTAL)} · ${pct(g.PCT_VALOR_RECEBIDO)}` }],
+  { eixo: t => "R$ " + (t / 1000).toLocaleString("pt-BR") + " mil", aria: "Valor recebido por forma de pagamento", margemEsq: 80 });
+
+// ---- Frequencia
+const fq = DADOS.frequencia, fiel = fq[fq.length - 1];
+document.getElementById("insight-frequencia").textContent =
+  `As clientes com ${fiel.FAIXA_FREQUENCIA.replace("6 ou mais", "6 visitas ou mais")} são ${pct(fiel.PCT_CLIENTES)} da base e geram ${pct(fiel.PCT_FATURAMENTO)} do faturamento.`;
+barras(document.getElementById("graf-frequencia"), fq.map(r => ({
+  ...r, rot: r.FAIXA_FREQUENCIA,
+  dica: [`Clientes: ${num(r.QTD_CLIENTES)} (${pct(r.PCT_CLIENTES)})`, `Faturamento: ${brl2(r.FATURAMENTO)} (${pct(r.PCT_FATURAMENTO)})`, `Valor médio por cliente: ${brl2(r.VALOR_MEDIO_POR_CLIENTE)}`],
+})), [
+  { campo: "PCT_CLIENTES", cor: "var(--series-1)", rotulo: g => `${pct(g.PCT_CLIENTES)} · ${num(g.QTD_CLIENTES)} clientes` },
+  { campo: "PCT_FATURAMENTO", cor: "var(--series-2)", rotulo: g => `${pct(g.PCT_FATURAMENTO)} · ${brl(g.FATURAMENTO)}` },
+], { eixo: t => t + "%", aria: "Percentual de clientes e de faturamento por faixa de frequência", margemEsq: 96 });
+
+// ---- Horario de pico
+const hr = DADOS.horario;
+const top3 = [...hr].sort((a, b) => b.QTD_ATENDIMENTOS - a.QTD_ATENDIMENTOS).slice(0, 3);
+const tarde = hr.filter(r => r.FAIXA_HORARIO >= "15h" && r.FAIXA_HORARIO <= "17h").reduce((s, r) => s + r.PCT_ATENDIMENTOS, 0);
+document.getElementById("insight-horario").textContent =
+  `Das 15h às 17h fecham ${pct(tarde)} dos atendimentos; ao meio-dia está o maior faturamento (${brl(hr.find(r => r.FAIXA_HORARIO === "12h").FATURAMENTO)}).`;
+colunas(document.getElementById("graf-horario"), hr.map(r => ({
+  v: r.QTD_ATENDIMENTOS, rot: r.FAIXA_HORARIO,
+  destaque: top3.includes(r) ? num(r.QTD_ATENDIMENTOS) : null,
+  titulo: r.FAIXA_HORARIO,
+  dica: [`Atendimentos: ${num(r.QTD_ATENDIMENTOS)} (${pct(r.PCT_ATENDIMENTOS)})`, `Faturamento: ${brl2(r.FATURAMENTO)} (${pct(r.PCT_FATURAMENTO)})`, `Ticket médio: ${brl2(r.TICKET_MEDIO)}`],
+})), { eixo: t => num(t), aria: "Atendimentos por hora do dia", margemEsq: 36 });
+</script>
+</body>
+</html>

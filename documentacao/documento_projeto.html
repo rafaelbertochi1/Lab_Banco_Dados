@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Projeto de Banco de Dados</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 18mm 16mm; }
+  :root {
+    --ink: #1b1b1a; --ink-2: #4a4945; --muted: #85837d; --line: #dcdad3; --soft: #f4f3ef;
+    --accent: #1f5fae; --accent-soft: #e6eef9; --accent-2: #c2531f;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; background: #fff; color: var(--ink); font: 10.5pt/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
+  h1, h2, h3 { line-height: 1.2; margin: 0; }
+  h2 { font-size: 18pt; color: var(--accent); margin: 0 0 4mm; font-weight: 650; }
+  h2 .n { color: var(--muted); font-weight: 500; margin-right: 6px; }
+  h3 { font-size: 12pt; margin: 6mm 0 2mm; font-weight: 650; }
+  p { margin: 0 0 3mm; }
+  .secao { break-before: page; }
+  .lead { color: var(--ink-2); font-size: 11pt; }
+  .nota { color: var(--muted); font-size: 9pt; }
+  code, .mono { font-family: Consolas, "Cascadia Mono", monospace; font-size: 9pt; }
+  code { background: var(--soft); padding: 0 3px; border-radius: 3px; }
+  pre { font: 8.6pt/1.45 Consolas, "Cascadia Mono", monospace; background: var(--soft); border: 1px solid var(--line); border-radius: 6px; padding: 3mm 4mm; margin: 0 0 4mm; white-space: pre-wrap; break-inside: avoid; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 4mm; font-size: 9.5pt; break-inside: avoid; }
+  th, td { text-align: left; padding: 1.6mm 2.4mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--accent-soft); color: var(--ink); font-weight: 650; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .caixa { border: 1px solid var(--line); border-left: 3px solid var(--accent); background: #fafaf8; padding: 3mm 4mm; border-radius: 4px; margin: 0 0 4mm; break-inside: avoid; }
+  figure { margin: 0 0 5mm; break-inside: avoid; }
+  figure img { width: 100%; display: block; border: 1px solid var(--line); border-radius: 4px; }
+  figcaption { font-size: 9pt; color: var(--ink-2); margin-top: 1.5mm; }
+  figcaption b { color: var(--ink); }
+  .grade2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  svg text { font-family: "Segoe UI", system-ui, sans-serif; }
+
+  /* capa */
+  .capa { height: 255mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .capa .topo { color: var(--muted); font-size: 10pt; letter-spacing: .04em; text-transform: uppercase; }
+  .capa h1 { font-size: 30pt; font-weight: 700; color: var(--ink); margin-top: 60mm; }
+  .capa .sub { font-size: 15pt; color: var(--accent); margin-top: 3mm; }
+  .capa .entrega { margin-top: 10mm; font-size: 11pt; color: var(--ink-2); }
+  .capa .integrantes { border-top: 2px solid var(--accent); padding-top: 4mm; }
+  .capa .integrantes h3 { margin: 0 0 2mm; font-size: 10pt; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .capa .integrantes div { font-size: 12pt; line-height: 1.7; }
+
+  .sumario li { margin: 1mm 0; }
+  .sumario { font-size: 11pt; padding-left: 5mm; }
+
+  .assinatura { display: grid; grid-template-columns: 1fr 1fr; gap: 16mm 12mm; margin-top: 22mm; }
+  .assinatura div { border-top: 1px solid var(--ink); padding-top: 1.5mm; font-size: 10pt; }
+  .assinatura span { display: block; color: var(--muted); font-size: 8.5pt; }
+  .reservado { border: 1.5px dashed var(--muted); border-radius: 6px; height: 150mm; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--muted); font-size: 11pt; padding: 10mm; }
+</style>
+</head>
+<body>
+
+<!-- ================================================================ CAPA -->
+<section class="capa">
+  <div class="topo">Laboratório de Banco de Dados · Grupo 5</div>
+  <div>
+    <h1>Sistema de Gestão de Salão</h1>
+    <div class="sub">Projeto de banco de dados: da fonte de dados ao BI</div>
+    <div class="entrega">Entrega 4 · Documento do projeto<br>Novembro de 2026</div>
+  </div>
+  <div class="integrantes">
+    <h3>Integrantes</h3>
+    <div>Arthur Cavalcante e Silva<br>Gabriela Silveira Lima<br>João Vitor Dornelas Correa<br>Rafael Bertochi Figueiredo</div>
+  </div>
+</section>
+
+<!-- ================================================================ SUMARIO -->
+<section class="secao">
+  <h2>Sumário</h2>
+  <ol class="sumario">
+    <li>Fonte de dados inicial</li>
+    <li>Modelo relacional</li>
+    <li>Mecanismo de historiamento</li>
+    <li>Auditoria</li>
+    <li>Arquitetura: esquemas segmentados para auditoria e BI</li>
+    <li>Entrega 4: esquema DW e stages</li>
+    <li>Dashboards</li>
+    <li>Documento assinado da entrega do projeto</li>
+    <li>Foto (evidência da entrega)</li>
+  </ol>
+
+  <h3>Resumo do projeto</h3>
+  <p>O projeto modela o banco de dados de um salão de beleza especializado em cabelo cacheado, a partir de um relatório real exportado do sistema de gestão do salão. Ao longo das entregas, o grupo normalizou a fonte de dados, criou o esquema relacional em Oracle, carregou os três períodos de dados, implementou o historiamento e a auditoria das alterações e, nesta entrega, criou um esquema separado de BI (<code>DW</code>) com stages que alimentam os dashboards.</p>
+
+  <table>
+    <tr><th>Entrega</th><th>Conteúdo</th></tr>
+    <tr><td>1</td><td>Fonte de dados, modelo relacional, dicionário de dados e carga do 1º período (jan a ago/2025)</td></tr>
+    <tr><td>2</td><td>Carga do 2º período (set/2025 a fev/2026), views analíticas e consultas estratégicas</td></tr>
+    <tr><td>3</td><td>Carga do 3º período (mar a ago/2026), esquemas APP e APP_AUDIT, historiamento e auditoria</td></tr>
+    <tr><td>4</td><td>Esquema DW, views dinâmicas e materializadas (stages), consultas estratégicas sobre as stages e dashboards</td></tr>
+  </table>
+
+  <h3>Scripts do repositório (ordem de execução)</h3>
+  <table>
+    <tr><th>Script</th><th>Conectado como</th><th>O que faz</th></tr>
+    <tr><td class="mono">01_usuarios.sql</td><td>SYS</td><td>Cria os usuários APP e APP_AUDIT</td></tr>
+    <tr><td class="mono">02_app.sql</td><td>APP</td><td>Tabelas, sequences, chaves, tabelas de histórico H_* e triggers</td></tr>
+    <tr><td class="mono">03_app_audit.sql</td><td>APP_AUDIT</td><td>Tabela AUDITORIA, procedure e triggers de auditoria</td></tr>
+    <tr><td class="mono">04_dados.sql</td><td>APP</td><td>Carga dos dados dos três períodos</td></tr>
+    <tr><td class="mono">05_historico.sql</td><td>APP</td><td>Move os atendimentos até jul/2026 para o histórico</td></tr>
+    <tr><td class="mono">06_dw.sql</td><td>SYS</td><td>Cria o usuário DW e dá leitura nas tabelas do APP</td></tr>
+    <tr><td class="mono">07 a 10_stage_*.sql</td><td>DW</td><td>Uma stage por integrante: view dinâmica, view materializada e consulta</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================ 1 FONTE -->
+<section class="secao">
+  <h2><span class="n">1</span>Fonte de dados inicial</h2>
+  <p class="lead">A fonte é um relatório real exportado do sistema de gestão do salão (<code>relatorio.csv</code>), cobrindo o período de 04/01/2025 a 30/08/2026.</p>
+  <p>O arquivo trazia os problemas típicos de um relatório exportado direto do sistema: codificação Latin-1, separador ponto e vírgula, números no formato brasileiro (1.234,56) e, principalmente, duas tabelas diferentes no mesmo arquivo: os atendimentos e vendas (serviço, produto, pacote, vale-presente, desconto, formas de pagamento, gorjeta) e o fechamento diário de caixa.</p>
+  <p>Depois de separar as duas tabelas e limpar os dados, a fonte foi organizada em uma planilha (<code>fonte_de_dados.xlsx</code>) com uma aba por tabela, já normalizada até a 3FN. Para simular a chegada de dados novos ao longo do semestre, a base foi dividida em três planilhas, uma por entrega:</p>
+
+  <table>
+    <tr><th>Tabela (aba)</th><th>Conteúdo</th><th class="num">Base completa</th><th class="num">Entrega 1<br><span class="nota">jan–ago/25</span></th><th class="num">Entrega 2<br><span class="nota">set/25–fev/26</span></th><th class="num">Entrega 3<br><span class="nota">mar–ago/26</span></th></tr>
+    <tr><td class="mono">CLIENTE</td><td>Clientes atendidas</td><td class="num">246</td><td class="num">137</td><td class="num">98</td><td class="num">88</td></tr>
+    <tr><td class="mono">FUNCIONARIO</td><td>Quem fechou a conta</td><td class="num">3</td><td class="num">3</td><td class="num">1</td><td class="num">1</td></tr>
+    <tr><td class="mono">MOTIVO_DESCONTO</td><td>Motivos de desconto</td><td class="num">4</td><td class="num">3</td><td class="num">2</td><td class="num">3</td></tr>
+    <tr><td class="mono">FORMA_PAGAMENTO</td><td>Formas de pagamento</td><td class="num">7</td><td class="num">5</td><td class="num">5</td><td class="num">6</td></tr>
+    <tr><td class="mono">ATENDIMENTO</td><td>Atendimentos e vendas</td><td class="num">693</td><td class="num">297</td><td class="num">200</td><td class="num">189</td></tr>
+    <tr><td class="mono">PAGAMENTO_ATENDIMENTO</td><td>Valor pago por forma de pagamento</td><td class="num">887</td><td class="num">378</td><td class="num">267</td><td class="num">242</td></tr>
+    <tr><td class="mono">CAIXA_DIARIO</td><td>Fechamento diário do caixa</td><td class="num">234</td><td class="num">107</td><td class="num">61</td><td class="num">66</td></tr>
+  </table>
+  <p class="nota">As tabelas de apoio (clientes, funcionários, motivos e formas de pagamento) aparecem em mais de um período, por isso a soma das colunas por entrega é maior que a base completa nessas linhas.</p>
+
+  <div class="caixa">
+    <b>Registros com data fora do período.</b> Sete atendimentos (ids 83 a 89) estão com a data registrada em 2024, fora do período do projeto e fora da sequência cronológica (o id 82 é de 22/03/2025 e o id 90 é de 25/03/2025). Tudo indica um erro de digitação do ano no sistema de origem. Eles ficaram fora das três planilhas por entrega (297 + 200 + 189 = 686 atendimentos), mas estão na carga completa do banco (693), todos com valor zero. Nos dashboards eles entram nos totais e ficam fora do gráfico mensal.
+  </div>
+
+  <h3>Principais transformações</h3>
+  <table>
+    <tr><th>Problema na fonte</th><th>Tratamento</th></tr>
+    <tr><td>Atendimentos e caixa diário no mesmo arquivo</td><td>Separados em <code>ATENDIMENTO</code> e <code>CAIXA_DIARIO</code>, que têm granularidades diferentes (por atendimento × por dia)</td></tr>
+    <tr><td>Uma coluna de valor para cada forma de pagamento na mesma linha (grupo repetitivo)</td><td>Transformadas em linhas da tabela <code>PAGAMENTO_ATENDIMENTO</code> (1FN)</td></tr>
+    <tr><td>Nome de quem fechou a conta e motivo do desconto repetidos em texto</td><td>Movidos para <code>FUNCIONARIO</code> e <code>MOTIVO_DESCONTO</code>, referenciados por FK (3FN)</td></tr>
+    <tr><td>Números no formato 1.234,56 e encoding Latin-1</td><td>Convertidos para número decimal e UTF-8 na carga</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================ 2 MODELO -->
+<section class="secao">
+  <h2><span class="n">2</span>Modelo relacional</h2>
+  <p class="lead">O modelo tem sete tabelas operacionais no esquema <code>APP</code>. Na entrega 3, os nomes das colunas passaram a usar o prefixo de cada tabela (por exemplo, <code>ATD_</code> para ATENDIMENTO e <code>CLI_</code> para CLIENTE). Também foram criadas as tabelas de histórico <code>H_*</code>.</p>
+
+  <svg viewBox="0 0 1000 560" width="100%" role="img" aria-label="Diagrama do modelo relacional do esquema APP">
+    <defs>
+      <style>
+        .tb { fill: #fff; stroke: #9db7da; stroke-width: 1.2; }
+        .hd { fill: #1f5fae; }
+        .ht { fill: #fff; font-size: 12px; font-weight: 700; }
+        .rw { fill: #1b1b1a; font-size: 10.5px; }
+        .tp { fill: #85837d; font-size: 10px; }
+        .pk { fill: #1f5fae; font-size: 9.5px; font-weight: 700; }
+        .fk { fill: #c2531f; font-size: 9.5px; font-weight: 700; }
+        .ln { stroke: #6b6a65; stroke-width: 1.3; fill: none; }
+        .ld { stroke: #6b6a65; stroke-width: 1.3; fill: none; stroke-dasharray: 5 4; }
+        .cd { fill: #4a4945; font-size: 11px; font-weight: 700; }
+        .hb { fill: #f4f3ef; stroke: #c3c2b7; stroke-dasharray: 4 3; }
+      </style>
+    </defs>
+
+    <!-- CLIENTE -->
+    <rect class="tb" x="20" y="20" width="200" height="62" rx="4"/><rect class="hd" x="20" y="20" width="200" height="24" rx="4"/>
+    <text class="ht" x="30" y="37">CLIENTE</text>
+    <text class="pk" x="28" y="59">PK</text><text class="rw" x="50" y="59">CLI_ID</text><text class="tp" x="212" y="59" text-anchor="end">NUMBER(10)</text>
+    <text class="rw" x="50" y="74">CLI_NOME</text><text class="tp" x="212" y="74" text-anchor="end">VARCHAR2(150)</text>
+
+    <!-- FUNCIONARIO -->
+    <rect class="tb" x="250" y="20" width="200" height="62" rx="4"/><rect class="hd" x="250" y="20" width="200" height="24" rx="4"/>
+    <text class="ht" x="260" y="37">FUNCIONARIO</text>
+    <text class="pk" x="258" y="59">PK</text><text class="rw" x="280" y="59">FUN_ID</text><text class="tp" x="442" y="59" text-anchor="end">NUMBER(10)</text>
+    <text class="pk" x="258" y="74">UQ</text><text class="rw" x="280" y="74">FUN_NOME</text><text class="tp" x="442" y="74" text-anchor="end">VARCHAR2(100)</text>
+
+    <!-- MOTIVO_DESCONTO -->
+    <rect class="tb" x="480" y="20" width="230" height="62" rx="4"/><rect class="hd" x="480" y="20" width="230" height="24" rx="4"/>
+    <text class="ht" x="490" y="37">MOTIVO_DESCONTO</text>
+    <text class="pk" x="488" y="59">PK</text><text class="rw" x="510" y="59">MTD_ID</text><text class="tp" x="702" y="59" text-anchor="end">NUMBER(10)</text>
+    <text class="pk" x="488" y="74">UQ</text><text class="rw" x="510" y="74">MTD_DESCRICAO</text><text class="tp" x="702" y="74" text-anchor="end">VARCHAR2(200)</text>
+
+    <!-- FORMA_PAGAMENTO -->
+    <rect class="tb" x="760" y="20" width="220" height="62" rx="4"/><rect class="hd" x="760" y="20" width="220" height="24" rx="4"/>
+    <text class="ht" x="770" y="37">FORMA_PAGAMENTO</text>
+    <text class="pk" x="768" y="59">PK</text><text class="rw" x="790" y="59">FPG_ID</text><text class="tp" x="972" y="59" text-anchor="end">NUMBER(10)</text>
+    <text class="pk" x="768" y="74">UQ</text><text class="rw" x="790" y="74">FPG_DESCRICAO</text><text class="tp" x="972" y="74" text-anchor="end">VARCHAR2(30)</text>
+
+    <!-- ATENDIMENTO -->
+    <rect class="tb" x="250" y="140" width="310" height="332" rx="4"/><rect class="hd" x="250" y="140" width="310" height="24" rx="4"/>
+    <text class="ht" x="260" y="157">ATENDIMENTO</text>
+    <g>
+      <text class="pk" x="258" y="179">PK</text><text class="rw" x="280" y="179">ATD_ID</text><text class="tp" x="552" y="179" text-anchor="end">NUMBER(10)</text>
+      <text class="rw" x="280" y="194">ATD_DT_ATENDIMENTO</text><text class="tp" x="552" y="194" text-anchor="end">DATE</text>
+      <text class="rw" x="280" y="209">ATD_DT_PAGAMENTO</text><text class="tp" x="552" y="209" text-anchor="end">DATE</text>
+      <text class="rw" x="280" y="224">ATD_TIPO</text><text class="tp" x="552" y="224" text-anchor="end">VARCHAR2(30)</text>
+      <text class="fk" x="258" y="239">FK</text><text class="rw" x="280" y="239">ATD_CLI_ID</text><text class="tp" x="552" y="239" text-anchor="end">NUMBER(10)</text>
+      <text class="fk" x="258" y="254">FK</text><text class="rw" x="280" y="254">ATD_FUN_ID</text><text class="tp" x="552" y="254" text-anchor="end">NUMBER(10)</text>
+      <text class="rw" x="280" y="269">ATD_TOTAL_SERVICO</text><text class="tp" x="552" y="269" text-anchor="end">NUMBER(10,2)</text>
+      <text class="rw" x="280" y="284">ATD_QTD_SERVICO</text><text class="tp" x="552" y="284" text-anchor="end">NUMBER(5)</text>
+      <text class="rw" x="280" y="299">ATD_TOTAL_PRODUTOS</text><text class="tp" x="552" y="299" text-anchor="end">NUMBER(10,2)</text>
+      <text class="rw" x="280" y="314">ATD_QTD_PRODUTO</text><text class="tp" x="552" y="314" text-anchor="end">NUMBER(5)</text>
+      <text class="rw" x="280" y="329">ATD_TOTAL_PACOTES</text><text class="tp" x="552" y="329" text-anchor="end">NUMBER(10,2)</text>
+      <text class="rw" x="280" y="344">ATD_QTD_PACOTES</text><text class="tp" x="552" y="344" text-anchor="end">NUMBER(5)</text>
+      <text class="rw" x="280" y="359">ATD_TOTAL_VALE_PRESENTE</text><text class="tp" x="552" y="359" text-anchor="end">NUMBER(10,2)</text>
+      <text class="rw" x="280" y="374">ATD_QTD_VALE_PRESENTE</text><text class="tp" x="552" y="374" text-anchor="end">NUMBER(5)</text>
+      <text class="rw" x="280" y="389">ATD_TOTAL_CREDITO_CLIENTE</text><text class="tp" x="552" y="389" text-anchor="end">NUMBER(10,2)</text>
+      <text class="rw" x="280" y="404">ATD_TOTAL_DESCONTOS</text><text class="tp" x="552" y="404" text-anchor="end">NUMBER(10,2)</text>
+      <text class="fk" x="258" y="419">FK</text><text class="rw" x="280" y="419">ATD_MTD_ID (opcional)</text><text class="tp" x="552" y="419" text-anchor="end">NUMBER(10)</text>
+      <text class="rw" x="280" y="434">ATD_TOTAL_GERAL</text><text class="tp" x="552" y="434" text-anchor="end">NUMBER(10,2)</text>
+      <text class="rw" x="280" y="449">ATD_COMENTARIO_FECHAMENTO</text><text class="tp" x="552" y="449" text-anchor="end">VARCHAR2(500)</text>
+      <text class="rw" x="280" y="464">ATD_COMENTARIO_ESTORNO</text><text class="tp" x="552" y="464" text-anchor="end">VARCHAR2(500)</text>
+    </g>
+
+    <!-- PAGAMENTO_ATENDIMENTO -->
+    <rect class="tb" x="760" y="160" width="220" height="77" rx="4"/><rect class="hd" x="760" y="160" width="220" height="24" rx="4"/>
+    <text class="ht" x="770" y="177">PAGAMENTO_ATENDIMENTO</text>
+    <text class="pk" x="768" y="199">PK</text><text class="rw" x="790" y="199">PGA_ATD_ID</text><text class="tp" x="972" y="199" text-anchor="end">NUMBER(10)</text>
+    <text class="pk" x="768" y="214">PK</text><text class="fk" x="783" y="214"></text><text class="rw" x="790" y="214">PGA_FPG_ID (FK)</text><text class="tp" x="972" y="214" text-anchor="end">NUMBER(10)</text>
+    <text class="rw" x="790" y="229">PGA_VALOR</text><text class="tp" x="972" y="229" text-anchor="end">NUMBER(10,2)</text>
+
+    <!-- CAIXA_DIARIO -->
+    <rect class="tb" x="760" y="290" width="220" height="197" rx="4"/><rect class="hd" x="760" y="290" width="220" height="24" rx="4"/>
+    <text class="ht" x="770" y="307">CAIXA_DIARIO</text>
+    <text class="pk" x="768" y="329">PK</text><text class="rw" x="790" y="329">CXD_ID</text><text class="tp" x="972" y="329" text-anchor="end">NUMBER(10)</text>
+    <text class="pk" x="768" y="344">UQ</text><text class="rw" x="790" y="344">CXD_DT_MOVIMENTO</text><text class="tp" x="972" y="344" text-anchor="end">DATE</text>
+    <text class="rw" x="790" y="359">CXD_ABERTURA_CAIXA</text>
+    <text class="rw" x="790" y="374">CXD_RECEBIDO_DINHEIRO</text>
+    <text class="rw" x="790" y="389">CXD_TROCO</text>
+    <text class="rw" x="790" y="404">CXD_DESPESAS_DINHEIRO</text>
+    <text class="rw" x="790" y="419">CXD_TOTAL_DINHEIRO</text>
+    <text class="rw" x="790" y="434">CXD_SANGRIA</text>
+    <text class="rw" x="790" y="449">CXD_SALDO_CAIXA</text>
+    <text class="rw" x="790" y="464">CXD_RECEBIDO_OUTRAS_FORMAS</text>
+    <text class="rw" x="790" y="479">CXD_DESPESAS_OUTRAS_FORMAS</text>
+    <text x="972" y="307" text-anchor="end" style="fill:#dbe6f5;font-size:10px">demais: NUMBER(10,2)</text>
+
+    <!-- Historico -->
+    <rect class="hb" x="20" y="140" width="200" height="200" rx="6"/>
+    <text class="rw" x="32" y="162" style="font-weight:700">Tabelas de histórico</text>
+    <text class="tp" x="32" y="178">mesmas colunas + *_DT_ENTRADA</text>
+    <text class="rw" x="32" y="200">H_ATENDIMENTO</text>
+    <text class="rw" x="32" y="216">H_PAGAMENTO_ATENDIMENTO</text>
+    <text class="rw" x="32" y="232">H_CLIENTE</text>
+    <text class="rw" x="32" y="248">H_FUNCIONARIO</text>
+    <text class="rw" x="32" y="264">H_MOTIVO_DESCONTO</text>
+    <text class="rw" x="32" y="280">H_FORMA_PAGAMENTO</text>
+    <text class="rw" x="32" y="296">H_CAIXA_DIARIO</text>
+    <text class="tp" x="32" y="320">PK = id original + data de entrada</text>
+
+    <!-- Relacionamentos -->
+    <path class="ln" d="M120 82 V110 H300 V140"/>
+    <text class="cd" x="126" y="98">1</text><text class="cd" x="306" y="134">N</text>
+    <path class="ln" d="M350 82 V140"/>
+    <text class="cd" x="356" y="98">1</text><text class="cd" x="356" y="134">N</text>
+    <path class="ld" d="M595 82 V110 H500 V140"/>
+    <text class="cd" x="601" y="98">0..1</text><text class="cd" x="506" y="134">N</text>
+    <path class="ln" d="M870 82 V160"/>
+    <text class="cd" x="876" y="98">1</text><text class="cd" x="876" y="154">N</text>
+    <path class="ld" d="M560 199 H760"/>
+    <text class="cd" x="566" y="193">1</text><text class="cd" x="748" y="193">N</text>
+    <text class="tp" x="660" y="215" text-anchor="middle">ligação lógica (sem FK física)</text>
+
+    <!-- legenda -->
+    <g transform="translate(20 500)">
+      <text class="pk" x="0" y="12">PK</text><text class="tp" x="20" y="12">chave primária</text>
+      <text class="fk" x="110" y="12">FK</text><text class="tp" x="130" y="12">chave estrangeira</text>
+      <text class="pk" x="230" y="12">UQ</text><text class="tp" x="250" y="12">única</text>
+      <path class="ln" d="M310 8 H350"/><text class="tp" x="356" y="12">obrigatória</text>
+      <path class="ld" d="M430 8 H470"/><text class="tp" x="476" y="12">opcional / lógica</text>
+    </g>
+  </svg>
+
+  <h3>Relacionamentos</h3>
+  <table>
+    <tr><th>Relacionamento</th><th>Cardinalidade</th><th>Regra</th></tr>
+    <tr><td>CLIENTE → ATENDIMENTO</td><td>1 : N</td><td>FK obrigatória <code>FK_ATD_CLI</code></td></tr>
+    <tr><td>FUNCIONARIO → ATENDIMENTO</td><td>1 : N</td><td>FK obrigatória <code>FK_ATD_FUN</code></td></tr>
+    <tr><td>MOTIVO_DESCONTO → ATENDIMENTO</td><td>0..1 : N</td><td>FK opcional <code>FK_ATD_MTD</code> (a maioria dos atendimentos não tem desconto)</td></tr>
+    <tr><td>FORMA_PAGAMENTO → PAGAMENTO_ATENDIMENTO</td><td>1 : N</td><td>FK obrigatória <code>FK_PGA_FPG</code></td></tr>
+    <tr><td>ATENDIMENTO → PAGAMENTO_ATENDIMENTO</td><td>1 : N</td><td>Ligação lógica: sem FK física, para que um atendimento possa ir para o histórico sem apagar os pagamentos</td></tr>
+  </table>
+  <p class="nota">CAIXA_DIARIO não tem FK: é um fechamento por dia, com granularidade diferente dos atendimentos. O modelo original da entrega 1 e o dicionário de dados estão no repositório (<code>modelo_relacional (1).pdf</code> e <code>dicionario_de_dados (1).docx</code>).</p>
+</section>
+
+<!-- ================================================================ 3 HISTORIAMENTO -->
+<section class="secao">
+  <h2><span class="n">3</span>Mecanismo de historiamento</h2>
+  <p class="lead">Toda alteração ou exclusão nas tabelas do APP guarda a versão anterior do registro numa tabela de histórico, com a data e hora em que ela saiu da tabela atual.</p>
+
+  <h3>Como funciona</h3>
+  <table>
+    <tr><th>Elemento</th><th>Descrição</th></tr>
+    <tr><td>Tabelas <code>H_*</code></td><td>Uma por tabela operacional (7 no total), com as mesmas colunas e o prefixo <code>H</code> (ex.: <code>HATD_</code>), mais a coluna <code>*_DT_ENTRADA</code></td></tr>
+    <tr><td>Chave primária</td><td>Id original + data de entrada. Um mesmo registro pode ter várias versões no histórico</td></tr>
+    <tr><td>Triggers <code>TG_H*</code></td><td><code>BEFORE UPDATE OR DELETE ... FOR EACH ROW</code>: copiam os valores <code>:OLD</code> para a tabela H_ com <code>SYSDATE</code></td></tr>
+    <tr><td>Triggers <code>TG_SEQ_*</code></td><td>Geram o id das novas linhas pelas sequences (ficam desligados durante a carga para manter os ids da fonte)</td></tr>
+  </table>
+
+  <pre>CREATE OR REPLACE TRIGGER "APP"."TG_HATD" BEFORE
+    UPDATE OR DELETE ON atendimento
+    FOR EACH ROW
+BEGIN
+    insert into h_atendimento values (:old.atd_id, :old.atd_dt_atendimento, :old.atd_dt_pagamento, :old.atd_tipo,
+        :old.atd_cli_id, :old.atd_fun_id, :old.atd_total_servico, :old.atd_qtd_servico,
+        ... demais colunas ...,
+        :old.atd_comentario_fechamento, :old.atd_comentario_estorno, sysdate);
+END;</pre>
+
+  <h3>Aplicação no projeto</h3>
+  <p>O script <code>05_historico.sql</code> exclui da tabela ATENDIMENTO os atendimentos anteriores a agosto de 2026. O trigger <code>TG_HATD</code> copia cada linha excluída para <code>H_ATENDIMENTO</code>. Assim a tabela atual fica só com o mês corrente e todo o passado continua disponível no histórico:</p>
+  <table>
+    <tr><th>Tabela</th><th class="num">Registros após o 05_historico.sql</th></tr>
+    <tr><td><code>APP.ATENDIMENTO</code> (ago/2026)</td><td class="num">27</td></tr>
+    <tr><td><code>APP.H_ATENDIMENTO</code> (jan/2024 a jul/2026)</td><td class="num">666</td></tr>
+    <tr><td><b>Total (igual à carga)</b></td><td class="num"><b>693</b></td></tr>
+  </table>
+
+  <h3>Teste</h3>
+  <p>Um <code>UPDATE</code> no atendimento 665 gerou na hora uma linha em <code>H_ATENDIMENTO</code> com o valor anterior (R$ 50,00) e a data de entrada. O teste foi desfeito com <code>ROLLBACK</code>.</p>
+  <pre>SQL&gt; update atendimento set atd_total_geral = atd_total_geral + 10 where atd_id = 665;
+1 row updated.
+
+   HATD_ID HATD_TOTAL_GERAL DT_ENTRADA
+---------- ---------------- ----------------
+       665               50 24/11/2026 18:13</pre>
+
+  <div class="caixa"><b>Uso no BI.</b> Como o passado está no histórico, as stages do DW juntam as duas tabelas: <code>ATENDIMENTO UNION ALL H_ATENDIMENTO</code>. Do histórico entra só a versão mais recente (<code>ROW_NUMBER() OVER (PARTITION BY id ORDER BY dt_entrada DESC) = 1</code>) de cada registro que não existe mais na tabela atual.</div>
+</section>
+
+<!-- ================================================================ 4 AUDITORIA -->
+<section class="secao">
+  <h2><span class="n">4</span>Auditoria</h2>
+  <p class="lead">As tabelas de histórico são a memória do sistema, então qualquer alteração nelas precisa deixar rastro. A auditoria fica num esquema separado, <code>APP_AUDIT</code>, que o usuário da aplicação não consegue ler nem alterar.</p>
+
+  <h3>Componentes</h3>
+  <table>
+    <tr><th>Objeto</th><th>Função</th></tr>
+    <tr><td><code>APP_AUDIT.AUDITORIA</code></td><td>Uma linha por coluna alterada: tabela, coluna, valor antigo, valor novo, tipo de operação (U/D), data, usuário do banco e usuário do sistema operacional</td></tr>
+    <tr><td><code>APP_AUDIT.PR_INSERE_AUDITORIA</code></td><td>Procedure que grava o registro de auditoria</td></tr>
+    <tr><td><code>APP_AUDIT.TG_AUD_H*</code> (7 triggers)</td><td>Disparam em <code>UPDATE</code> ou <code>DELETE</code> nas tabelas <code>APP.H_*</code>. No DELETE gravam o valor de todas as colunas; no UPDATE, só das colunas que mudaram</td></tr>
+    <tr><td><code>SEQ_AUD</code> / <code>TG_SEQ_AUD</code></td><td>Geram o <code>AUD_ID</code></td></tr>
+  </table>
+
+  <table>
+    <tr><th>Coluna</th><th>Tipo</th><th>Conteúdo</th></tr>
+    <tr><td class="mono">AUD_ID</td><td>NUMBER(10)</td><td>Identificador</td></tr>
+    <tr><td class="mono">AUD_TABELA</td><td>VARCHAR2(30)</td><td>Tabela de histórico alterada</td></tr>
+    <tr><td class="mono">AUD_COLUNA</td><td>VARCHAR2(30)</td><td>Coluna alterada</td></tr>
+    <tr><td class="mono">AUD_VALOR_ANTIGO / AUD_VALOR_NOVO</td><td>VARCHAR2(100)</td><td>Valor antes e depois (novo = nulo em exclusões)</td></tr>
+    <tr><td class="mono">AUD_TP_OPERACAO</td><td>CHAR(1)</td><td><code>U</code> = update, <code>D</code> = delete</td></tr>
+    <tr><td class="mono">AUD_DATA_ENTRADA</td><td>DATE</td><td>Quando a alteração aconteceu</td></tr>
+    <tr><td class="mono">AUD_BD_USER / AUD_SO_USER</td><td>VARCHAR2(255)</td><td>Usuário do banco (<code>USER</code>) e do sistema operacional (<code>SYS_CONTEXT('USERENV','OS_USER')</code>)</td></tr>
+  </table>
+
+  <h3>Teste</h3>
+  <p>Uma alteração direta no histórico (atendimento 1) foi registrada na auditoria com o valor antigo, o novo e os dois usuários. O teste foi desfeito com <code>ROLLBACK</code>, e a tabela voltou a ficar vazia.</p>
+  <pre>SQL&gt; update app.h_atendimento set hatd_total_geral = hatd_total_geral + 5 where hatd_id = 1;
+1 row updated.
+
+AUD_ID AUD_TABELA     AUD_COLUNA        VALOR_ANTIGO VALOR_NOVO OP DATA              BD_USER SO_USER
+------ -------------- ----------------- ------------ ---------- -- ----------------- ------- -------
+     2 H_ATENDIMENTO  HATD_TOTAL_GERAL  0            5          U  24/11/2026 18:13  SYS     oracle</pre>
+  <p>Conectado como APP, a mesma consulta à tabela de auditoria retorna <code>ORA-00942: table or view "APP_AUDIT"."AUDITORIA" does not exist</code>. A aplicação não enxerga a própria trilha de auditoria.</p>
+</section>
+
+<!-- ================================================================ 5 ARQUITETURA -->
+<section class="secao">
+  <h2><span class="n">5</span>Arquitetura: esquemas segmentados para auditoria e BI</h2>
+  <p class="lead">O banco foi dividido em três esquemas, cada um com uma responsabilidade e com permissões mínimas: a aplicação grava no APP, a auditoria fica isolada no APP_AUDIT e o BI só lê, a partir do DW.</p>
+
+  <svg viewBox="0 0 1000 470" width="100%" role="img" aria-label="Arquitetura dos esquemas APP, APP_AUDIT e DW">
+    <defs>
+      <marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#4a4945"/></marker>
+      <style>
+        .esq { fill: #f7f9fd; stroke: #1f5fae; stroke-width: 1.5; }
+        .esq2 { fill: #fdf6f2; stroke: #c2531f; stroke-width: 1.5; }
+        .esq3 { fill: #f3faf6; stroke: #1b8a5a; stroke-width: 1.5; }
+        .bx { fill: #fff; stroke: #c3c2b7; }
+        .t1 { font-size: 15px; font-weight: 700; fill: #1b1b1a; }
+        .t2 { font-size: 11px; fill: #4a4945; }
+        .t3 { font-size: 12px; font-weight: 650; fill: #1b1b1a; }
+        .mo { font-family: Consolas, monospace; font-size: 10.5px; fill: #1b1b1a; }
+        .ar { stroke: #4a4945; stroke-width: 1.5; fill: none; marker-end: url(#seta); }
+        .lb { font-size: 10.5px; fill: #4a4945; }
+      </style>
+    </defs>
+
+    <!-- Fonte -->
+    <rect class="bx" x="10" y="150" width="120" height="96" rx="6"/>
+    <text class="t3" x="70" y="174" text-anchor="middle">Fonte</text>
+    <text class="t2" x="70" y="194" text-anchor="middle">relatorio.csv</text>
+    <text class="t2" x="70" y="210" text-anchor="middle">planilhas por</text>
+    <text class="t2" x="70" y="225" text-anchor="middle">entrega</text>
+    <path class="ar" d="M130 198 H172"/>
+    <text class="lb" x="151" y="190" text-anchor="middle">carga</text>
+
+    <!-- APP -->
+    <rect class="esq" x="175" y="20" width="330" height="290" rx="8"/>
+    <text class="t1" x="190" y="44">APP</text><text class="t2" x="230" y="44">aplicação (OLTP)</text>
+    <rect class="bx" x="190" y="58" width="300" height="96" rx="5"/>
+    <text class="t3" x="202" y="77">Tabelas operacionais</text>
+    <text class="mo" x="202" y="96">ATENDIMENTO · PAGAMENTO_ATENDIMENTO</text>
+    <text class="mo" x="202" y="112">CLIENTE · FUNCIONARIO · CAIXA_DIARIO</text>
+    <text class="mo" x="202" y="128">FORMA_PAGAMENTO · MOTIVO_DESCONTO</text>
+    <text class="t2" x="202" y="146">27 atendimentos (mês atual)</text>
+    <path class="ar" d="M340 154 V196"/>
+    <text class="lb" x="348" y="174">TG_H* (UPDATE / DELETE)</text>
+    <rect class="bx" x="190" y="198" width="300" height="96" rx="5"/>
+    <text class="t3" x="202" y="217">Tabelas de histórico</text>
+    <text class="mo" x="202" y="236">H_ATENDIMENTO · H_PAGAMENTO_ATENDIMENTO</text>
+    <text class="mo" x="202" y="252">H_CLIENTE · H_FUNCIONARIO · H_CAIXA_DIARIO</text>
+    <text class="mo" x="202" y="268">H_FORMA_PAGAMENTO · H_MOTIVO_DESCONTO</text>
+    <text class="t2" x="202" y="286">666 atendimentos (jan/2024 a jul/2026)</text>
+
+    <!-- APP_AUDIT -->
+    <path class="ar" d="M340 294 V352"/>
+    <text class="lb" x="348" y="328">TG_AUD_H* (UPDATE / DELETE)</text>
+    <rect class="esq2" x="175" y="354" width="330" height="104" rx="8"/>
+    <text class="t1" x="190" y="378">APP_AUDIT</text><text class="t2" x="280" y="378">auditoria</text>
+    <text class="mo" x="190" y="400">AUDITORIA · PR_INSERE_AUDITORIA</text>
+    <text class="t2" x="190" y="420">quem alterou, quando, coluna, valor antigo e novo</text>
+    <text class="t2" x="190" y="438">APP não tem acesso de leitura</text>
+
+    <!-- DW -->
+    <path class="ar" d="M505 165 H588"/>
+    <text class="lb" x="546" y="155" text-anchor="middle">GRANT SELECT</text>
+    <text class="lb" x="546" y="182" text-anchor="middle">(só leitura)</text>
+    <rect class="esq3" x="590" y="20" width="250" height="290" rx="8"/>
+    <text class="t1" x="605" y="44">DW</text><text class="t2" x="638" y="44">BI (entrega 4)</text>
+    <rect class="bx" x="605" y="58" width="220" height="104" rx="5"/>
+    <text class="t3" x="617" y="77">Views dinâmicas</text>
+    <text class="mo" x="617" y="96">VW_STAGE_FATURAMENTO_MENSAL</text>
+    <text class="mo" x="617" y="112">VW_STAGE_FORMA_PAGAMENTO</text>
+    <text class="mo" x="617" y="128">VW_STAGE_FREQUENCIA_CLIENTE</text>
+    <text class="mo" x="617" y="144">VW_STAGE_HORARIO_PICO</text>
+    <path class="ar" d="M715 162 V196"/>
+    <text class="lb" x="723" y="183">mesma lógica, gravada</text>
+    <rect class="bx" x="605" y="198" width="220" height="96" rx="5"/>
+    <text class="t3" x="617" y="217">Views materializadas</text>
+    <text class="mo" x="617" y="236">STAGE_FATURAMENTO_MENSAL</text>
+    <text class="mo" x="617" y="252">STAGE_FORMA_PAGAMENTO</text>
+    <text class="mo" x="617" y="268">STAGE_FREQUENCIA_CLIENTE</text>
+    <text class="mo" x="617" y="284">STAGE_HORARIO_PICO</text>
+
+    <!-- Dashboard -->
+    <path class="ar" d="M840 246 H878"/>
+    <rect class="bx" x="880" y="196" width="110" height="100" rx="6"/>
+    <text class="t3" x="935" y="222" text-anchor="middle">Dashboards</text>
+    <text class="t2" x="935" y="242" text-anchor="middle">KPIs e 4 painéis</text>
+    <text class="t2" x="935" y="258" text-anchor="middle">(1 por stage)</text>
+  </svg>
+
+  <h3>Responsabilidade e permissões de cada esquema</h3>
+  <table>
+    <tr><th>Esquema</th><th>Papel</th><th>Permissões</th></tr>
+    <tr><td><b>APP</b></td><td>Dados da aplicação e histórico</td><td><code>CONNECT, RESOURCE</code>. Dono das tabelas operacionais e H_*</td></tr>
+    <tr><td><b>APP_AUDIT</b></td><td>Trilha de auditoria das tabelas de histórico</td><td><code>CONNECT, RESOURCE, CREATE ANY TRIGGER</code> (para criar triggers sobre tabelas do APP). Nenhum outro esquema recebe acesso à AUDITORIA</td></tr>
+    <tr><td><b>DW</b></td><td>Camada de BI: stages para relatórios e dashboards</td><td><code>CONNECT, RESOURCE, CREATE VIEW, CREATE MATERIALIZED VIEW</code> e só <code>SELECT</code> nas tabelas do APP (atuais e H_*). Não grava nada no APP</td></tr>
+  </table>
+
+  <h3>Por que separar</h3>
+  <ul>
+    <li><b>Segurança:</b> um erro ou acesso indevido pelo usuário da aplicação não consegue apagar a auditoria, e o BI não consegue alterar os dados de produção.</li>
+    <li><b>Desempenho:</b> os dashboards leem as views materializadas do DW, que já guardam o resultado agregado. As consultas pesadas não concorrem com a operação do salão. A atualização é feita sob demanda (<code>REFRESH FORCE ON DEMAND</code>).</li>
+    <li><b>Organização:</b> cada esquema tem um dono e um script de criação, o que facilita manutenção e entrega.</li>
+  </ul>
+</section>
+
+<!-- ================================================================ 6 ENTREGA 4 -->
+<section class="secao">
+  <h2><span class="n">6</span>Entrega 4: esquema DW e stages</h2>
+  <p class="lead">Cada integrante criou uma stage no DW, com três partes: uma view dinâmica (<code>VW_STAGE_*</code>), uma view materializada com a mesma lógica (<code>STAGE_*</code>) e uma consulta estratégica sobre a stage.</p>
+
+  <table>
+    <tr><th>Integrante</th><th>Stage</th><th>Pergunta de negócio</th><th>Script</th></tr>
+    <tr><td>João Vitor Dornelas Correa</td><td class="mono">STAGE_FATURAMENTO_MENSAL</td><td>Como o faturamento, o ticket médio e os descontos evoluem mês a mês?</td><td class="mono">07_stage_faturamento_mensal.sql</td></tr>
+    <tr><td>Gabriela Silveira Lima</td><td class="mono">STAGE_FORMA_PAGAMENTO</td><td>Quanto do valor recebido vem de cada forma de pagamento?</td><td class="mono">08_stage_forma_pagamento.sql</td></tr>
+    <tr><td>Arthur Cavalcante e Silva</td><td class="mono">STAGE_FREQUENCIA_CLIENTE</td><td>Quanto do faturamento depende de clientes que voltam?</td><td class="mono">09_stage_frequencia_cliente.sql</td></tr>
+    <tr><td>Rafael Bertochi Figueiredo</td><td class="mono">STAGE_HORARIO_PICO</td><td>Em que horários o salão mais atende e mais fatura?</td><td class="mono">10_stage_horario_pico.sql</td></tr>
+  </table>
+
+  <h3>4A · Criação do usuário DW</h3>
+  <figure><img src="../entrega4/4A/CRIACAO DO USUARIO DW.png"><figcaption><b>4A.</b> Script <code>06_dw.sql</code> executado como SYS: criação do usuário DW, privilégios de view e view materializada e <code>SELECT</code> nas tabelas do APP.</figcaption></figure>
+</section>
+
+<section class="secao">
+  <h3 style="margin-top:0">4B · Views dinâmicas</h3>
+  <figure><img src="../entrega4/4B/JOAO - CRIACAO VIEW_FATURAMENTO_MENSAL.png"><figcaption><b>João.</b> <code>VW_STAGE_FATURAMENTO_MENSAL</code></figcaption></figure>
+  <figure><img src="../entrega4/4B/GABRIELA - CRIACAO VIEW_FORMA_PAGAMENTO.png"><figcaption><b>Gabriela.</b> <code>VW_STAGE_FORMA_PAGAMENTO</code></figcaption></figure>
+</section>
+<section class="secao">
+  <figure><img src="../entrega4/4B/ARTHUR - CRIACAO VIEW_FREQUENCIA_CLIENTE.png"><figcaption><b>Arthur.</b> <code>VW_STAGE_FREQUENCIA_CLIENTE</code></figcaption></figure>
+  <figure><img src="../entrega4/4B/RAFAEL - CRIACAO VIEW_HORARIO_PICO.png"><figcaption><b>Rafael.</b> <code>VW_STAGE_HORARIO_PICO</code></figcaption></figure>
+</section>
+
+<section class="secao">
+  <h3 style="margin-top:0">4C · Views materializadas (stages)</h3>
+  <figure><img src="../entrega4/4C/JOAO - CRIACAO_MVIEW_FATURAMENTO_MENSAL.png"><figcaption><b>João.</b> <code>STAGE_FATURAMENTO_MENSAL</code></figcaption></figure>
+  <figure><img src="../entrega4/4C/GABRIELA - CRIACAO_MVIEW_FORMA_PAGAMENTO.png"><figcaption><b>Gabriela.</b> <code>STAGE_FORMA_PAGAMENTO</code></figcaption></figure>
+</section>
+<section class="secao">
+  <figure><img src="../entrega4/4C/ARTHUR - CRIACAO_MVIEW_FREQUENCIA_CLIENTE.png"><figcaption><b>Arthur.</b> <code>STAGE_FREQUENCIA_CLIENTE</code></figcaption></figure>
+  <figure><img src="../entrega4/4C/RAFAEL - CRIACAO_MVIEW_HORARIO_PICO.png"><figcaption><b>Rafael.</b> <code>STAGE_HORARIO_PICO</code></figcaption></figure>
+</section>
+
+<section class="secao">
+  <h3 style="margin-top:0">4D · Consultas estratégicas sobre as stages</h3>
+  <figure><img src="../entrega4/4D/JOAO - CONSULTA ESTRATEGICA - FATURAMENTO_MENSAL.png"><figcaption><b>João.</b> Faturamento mensal: o melhor mês foi nov/2025 (R$ 14.445) e o pior, out/2025 (R$ 579).</figcaption></figure>
+  <figure><img src="../entrega4/4D/GABRIELA - CONSULTA ESTRATEGICA - FORMA_PAGAMENTO.png"><figcaption><b>Gabriela.</b> O cartão de crédito responde por 57,9% do valor recebido, com o maior valor médio (R$ 297,40).</figcaption></figure>
+</section>
+<section class="secao">
+  <figure><img src="../entrega4/4D/ARTHUR - CONSULTA ESTRATEGICA - FREQUENCIA_CLIENTE.png"><figcaption><b>Arthur.</b> As clientes com 6 visitas ou mais são 9,4% da base e geram 35,1% do faturamento.</figcaption></figure>
+  <figure><img src="../entrega4/4D/RAFAEL - CONSULTA ESTRATEGICA - HORARIO_PICO.png"><figcaption><b>Rafael.</b> Das 15h às 17h fecham 40% dos atendimentos, e o meio-dia tem o maior faturamento por hora.</figcaption></figure>
+</section>
+
+<!-- ================================================================ 7 DASHBOARDS -->
+<section class="secao">
+  <h2><span class="n">7</span>Dashboards</h2>
+  <p class="lead">O dashboard lê as quatro stages do DW e mostra os indicadores gerais e um painel por integrante. Ele é gerado pelo script <code>dashboards/gerar_dashboard.py</code> a partir das stages exportadas e fica em <code>dashboards/dashboard.html</code>.</p>
+  <figure><img src="../dashboards/prints/00_dashboard_completo.png"><figcaption><b>Dashboard completo.</b> Faturamento total de R$ 129.734 em 693 atendimentos pagos, ticket médio de R$ 187,21 e 246 clientes atendidas.</figcaption></figure>
+</section>
+<section class="secao">
+  <div class="grade2">
+    <figure><img src="../dashboards/prints/01_JOAO_faturamento_mensal.png"><figcaption><b>João.</b> Faturamento por mês</figcaption></figure>
+    <figure><img src="../dashboards/prints/02_GABRIELA_forma_pagamento.png"><figcaption><b>Gabriela.</b> Valor por forma de pagamento</figcaption></figure>
+    <figure><img src="../dashboards/prints/03_ARTHUR_frequencia_clientes.png"><figcaption><b>Arthur.</b> Clientes e faturamento por frequência</figcaption></figure>
+    <figure><img src="../dashboards/prints/04_RAFAEL_horario_pico.png"><figcaption><b>Rafael.</b> Atendimentos por hora do dia</figcaption></figure>
+  </div>
+  <h3>Principais conclusões</h3>
+  <ul>
+    <li><b>Sazonalidade:</b> o faturamento tem pico em nov/2025 e queda forte em out/2025. Vale planejar campanhas para os meses fracos.</li>
+    <li><b>Pagamentos:</b> crédito e "Outros" somam 90% do valor recebido. O dinheiro em espécie é residual (2,1%).</li>
+    <li><b>Fidelização:</b> 28% das clientes (3 visitas ou mais) geram 63% do faturamento. Programas de retorno e pacotes têm alto impacto.</li>
+    <li><b>Agenda:</b> a tarde (15h a 17h) concentra o movimento. O começo da manhã e a noite ficam ociosos e podem receber promoções ou serviços longos.</li>
+  </ul>
+</section>
+
+<!-- ================================================================ 8 TERMO -->
+<section class="secao">
+  <h2><span class="n">8</span>Documento assinado da entrega do projeto</h2>
+  <!--TERMO--><h3 style="margin-top:6mm; font-size:15pt; text-align:center">Termo de Entrega do Projeto</h3>
+  <p style="text-align:center" class="nota">Laboratório de Banco de Dados · Grupo 5</p>
+  <p style="margin-top:8mm">Nós, integrantes do Grupo 5, declaramos que entregamos o projeto <b>Sistema de Gestão de Salão (Cachearia)</b>, composto por:</p>
+  <ul>
+    <li>Fonte de dados inicial e sua normalização;</li>
+    <li>Modelo relacional e dicionário de dados;</li>
+    <li>Scripts de criação e carga do banco (esquemas APP, APP_AUDIT e DW);</li>
+    <li>Mecanismo de historiamento e auditoria;</li>
+    <li>Stages de BI (views dinâmicas e materializadas), consultas estratégicas e dashboards;</li>
+    <li>Este documento do projeto.</li>
+  </ul>
+  <p>Os arquivos estão no repositório <span class="mono">github.com/rafaelbertochi1/Lab_Banco_Dados</span>.</p>
+  <p style="margin-top:8mm">Local e data: ______________________________, ____ / ____ / ________</p>
+  <div class="assinatura">
+    <div>Arthur Cavalcante e Silva<span>Assinatura</span></div>
+    <div>Gabriela Silveira Lima<span>Assinatura</span></div>
+    <div>João Vitor Dornelas Correa<span>Assinatura</span></div>
+    <div>Rafael Bertochi Figueiredo<span>Assinatura</span></div>
+  </div>
+  <div style="margin-top:18mm" class="assinatura">
+    <div>Professor(a) responsável<span>Assinatura de recebimento</span></div>
+  </div><!--/TERMO-->
+</section>
+
+<!-- ================================================================ 9 FOTO -->
+<section class="secao">
+  <h2><span class="n">9</span>Foto (evidência da entrega)</h2>
+  <p>Foto do grupo no momento da entrega do projeto.</p>
+  <!--FOTO--><div class="reservado">Inserir aqui a foto da entrega<br><span class="nota">(salve a foto como documentacao/foto_entrega.jpg e rode gerar_documento.py)</span></div><!--/FOTO-->
+</section>
+
+</body>
+</html>
