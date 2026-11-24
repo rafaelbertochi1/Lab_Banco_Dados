@@ -23,4 +23,4 @@ Integrantes: Arthur Cavalcante e Silva, Gabriela Silveira Lima, João Vitor Dorn
 
 - `entrega4/`: prints da entrega 4 (4A usuário DW, 4B views dinâmicas, 4C views materializadas, 4D consultas).
 - `dashboards/`: dashboard das stages (`dashboard.html`), prints e o script que gera tudo a partir de `dados/*.csv`.
-- `documentacao/`: documento do projeto em PDF e o termo de entrega para assinar. Para incluir o termo assinado e a foto, salve `termo_assinado.jpg` e `foto_entrega.jpg` nessa pasta e rode `python gerar_documento.py`.
+- `documentacao/`: documento do projeto (`Documento_Projeto_Grupo5_Entrega4.pdf`), gerado a partir de `documento_projeto.html` com `python gerar_documento.py`.
